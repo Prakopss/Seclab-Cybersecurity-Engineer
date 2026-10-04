@@ -1,0 +1,12 @@
+=== [CONFIDENTIAL SYSTEM FILE] ===
+FLAG{LFI_PATH_TRAVERSAL_SERVER_PWNED_2026}
+Location: /app/sensitive_files/flag.txt
+Access Level: SYSTEM ROOT ONLY
+
+Congratulations! You have successfully exploited Local File Inclusion (LFI).
+In a real-world scenario, attackers use LFI to read:
+- /etc/passwd
+- /etc/shadow
+- /proc/self/environ
+- Application source code (e.g. app.py, .env)
+- SSH private keys (~/.ssh/id_rsa)

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Index of /backup/ - CyberLab{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-dark border-warning">
+            <div class="card-header bg-dark border-warning d-flex justify-content-between align-items-center">
+                <span class="fs-5 fw-bold text-warning">
+                    <i class="fa-solid fa-folder-tree me-2"></i>Modul 8: Direktori Terbuka (Open Directory / Directory Listing)
+                </span>
+                <span class="badge bg-warning text-dark">Information Disclosure</span>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-secondary small mb-3">
+                    <strong><i class="fa-solid fa-circle-info me-1"></i>Penjelasan Kerentanan:</strong>
+                    <em>Directory Listing</em> terjadi ketika web server dikonfigurasi untuk menampilkan daftar isi direktori secara otomatis jika tidak ada file indeks default (seperti <code>index.html</code>).
+                    Akibatnya, penyerang dapat menjelajahi seluruh file internal server, mengunduh source code, database backup, atau file konfigurasi rahasia.
+                    <br><br>
+                    <strong>Google Dork Umum:</strong> <code>intitle:"index of /backup"</code> atau <code>intitle:"index of" "database.sql"</code>
+                </div>
+
+                <!-- Kontrol Patch Keamanan (Mentor Tool) -->
+                <div class="d-flex justify-content-between align-items-center p-3 mb-4 rounded border {% if is_patched %}border-danger bg-danger bg-opacity-10{% else %}border-warning bg-warning bg-opacity-10{% endif %}">
+                    <div>
+                        <span class="fw-bold {% if is_patched %}text-danger{% else %}text-warning{% endif %}">
+                            <i class="fa-solid {% if is_patched %}fa-shield-halved{% else %}fa-triangle-exclamation{% endif %} me-2"></i>
+                            Status Proteksi: {% if is_patched %}<span class="badge bg-danger">TER-PATCH (403 FORBIDDEN)</span>{% else %}<span class="badge bg-warning text-dark">RENTAN (DIRECTORY LISTING OPEN)</span>{% endif %}
+                        </span>
+                        <p class="small text-secondary mb-0 mt-1">
+                            {% if is_patched %}Direktori dikunci rapat, simulasi autoindex off &amp; penolakan file browsing.{% else %}Direktori terbuka untuk umum, siapa pun dapat melihat dan mengunduh database backup.{% endif %}
+                        </p>
+                    </div>
+                    <form action="/backup/toggle-patch" method="POST" class="m-0">
+                        {% if is_patched %}
+                        <button type="submit" class="btn btn-outline-warning btn-sm fw-bold">
+                            <i class="fa-solid fa-unlock me-1"></i> Buka Celah (Mode Demo)
+                        </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-danger btn-sm fw-bold">
+                            <i class="fa-solid fa-shield-halved me-1"></i> Terapkan Patch Keamanan (Tutup Direktori)
+                        </button>
+                        {% endif %}
+                    </form>
+                </div>
+
+                {% if is_patched %}
+                <!-- Tampilan 403 Forbidden saat Ter-patch -->
+                <div class="p-5 text-center bg-black border border-danger rounded-3 mb-4">
+                    <i class="fa-solid fa-ban text-danger fa-4x mb-3"></i>
+                    <h2 class="text-danger fw-bold font-monospace mb-1">403 FORBIDDEN</h2>
+                    <h5 class="text-light mb-3">Access to this directory on the server is denied.</h5>
+                    <p class="text-secondary small mx-auto" style="max-width: 600px;">
+                        Web server security policy melarang browsing direktori (<code>Options -Indexes</code> pada Apache atau <code>autoindex off;</code> pada Nginx). Tidak ada file yang dapat dilihat atau diunduh oleh publik.
+                    </p>
+                </div>
+                {% else %}
+                <!-- Tampilan Klasik Index of /backup/ (Saat Celah Terbuka) -->
+                <div class="card bg-black border-secondary p-3 mb-4">
+                    <h5 class="font-monospace text-light mb-3">
+                        <i class="fa-solid fa-folder-open text-warning me-2"></i>Index of /backup/
+                    </h5>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover font-monospace small align-middle mb-0">
+                            <thead>
+                                <tr class="border-secondary text-secondary">
+                                    <th>Nama File</th>
+                                    <th>Terakhir Diperbarui</th>
+                                    <th>Ukuran File</th>
+                                    <th class="text-center">Aksi Unduh</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <a href="/" class="text-decoration-none text-light">
+                                            <i class="fa-solid fa-turn-up text-secondary me-2"></i>../ (Parent Directory)
+                                        </a>
+                                    </td>
+                                    <td class="text-secondary">-</td>
+                                    <td class="text-secondary">-</td>
+                                    <td class="text-center">-</td>
+                                </tr>
+                                {% for file in files %}
+                                <tr>
+                                    <td>
+                                        <a href="/backup/{{ file.name }}" target="_blank" class="text-decoration-none text-info fw-semibold">
+                                            {% if file.name.endswith('.sql') %}
+                                                <i class="fa-solid fa-database text-danger me-2"></i>
+                                            {% elif file.name.endswith('.txt') %}
+                                                <i class="fa-solid fa-file-lines text-warning me-2"></i>
+                                            {% elif file.name.endswith('.bak') %}
+                                                <i class="fa-solid fa-file-shield text-success me-2"></i>
+                                            {% else %}
+                                                <i class="fa-solid fa-file text-secondary me-2"></i>
+                                            {% endif %}
+                                            {{ file.name }}
+                                        </a>
+                                    </td>
+                                    <td class="text-secondary">{{ file.modified }}</td>
+                                    <td class="text-secondary">{{ file.size }}</td>
+                                    <td class="text-center">
+                                        <a href="/backup/{{ file.name }}" target="_blank" class="btn btn-sm btn-outline-warning py-0">
+                                            <i class="fa-solid fa-download me-1"></i>Unduh
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="alert alert-dark border border-secondary small text-secondary mb-0">
+                    <strong class="text-light"><i class="fa-solid fa-shield-halved me-1"></i>Cara Perbaikan (Remediasi Developer):</strong>
+                    <ul class="mb-0 mt-1">
+                        <li><strong>Apache:</strong> Tambahkan direktif <code>Options -Indexes</code> di konfigurasi web server atau file <code>.htaccess</code>.</li>
+                        <li><strong>Nginx:</strong> Pastikan direktif <code>autoindex off;</code> diset pada blok <code>location</code>.</li>
+                        <li><strong>Prinsip Arsitektur:</strong> Jangan pernah menyimpan file cadangan database (<code>.sql</code>, <code>.bak</code>, <code>.dump</code>) di dalam direktori web root publik.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

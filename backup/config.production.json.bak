@@ -1,0 +1,17 @@
+{
+  "app_name": "CyberSec Enterprise Portal",
+  "environment": "production",
+  "debug": false,
+  "database": {
+    "host": "10.0.10.25",
+    "port": 5432,
+    "user": "db_master_admin",
+    "password": "MasterDBPassEncrypted2026!",
+    "name": "corporate_main_db"
+  },
+  "jwt": {
+    "secret": "s3cr3t_jwt_k3y_992144_c0rp0r4t3",
+    "expiration_hours": 24
+  },
+  "backup_s3_bucket": "s3://internal-financial-backups-2026/vault/"
+}

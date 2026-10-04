@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Module 1: SQL Injection{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="fw-bold text-light mb-1">
+            <i class="fa-solid fa-database text-danger me-2"></i>Module 1: SQL Injection (SQLi)
+        </h3>
+        <p class="text-muted mb-0">Celah manipulasi query SQL pada otentikasi login dan fitur ekstraksi data rahasia.</p>
+    </div>
+    <span class="badge badge-vuln vuln-sqli fs-6 px-3 py-2">OWASP Top 10: A03:2021-Injection</span>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-4" id="sqliTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link {% if active_tab == 'login' or not active_tab %}active{% endif %}" id="login-tab" data-bs-toggle="tab" data-bs-target="#login-pane" type="button" role="tab">
+            <i class="fa-solid fa-lock-open me-2"></i>1.1 Authentication Bypass (Login)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link {% if active_tab == 'union' %}active{% endif %}" id="union-tab" data-bs-toggle="tab" data-bs-target="#union-pane" type="button" role="tab">
+            <i class="fa-solid fa-table-list me-2"></i>1.2 Data Extraction (UNION SELECT)
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="sqliTabsContent">
+
+    <!-- Tab 1: Login Bypass -->
+    <div class="tab-pane fade {% if active_tab == 'login' or not active_tab %}show active{% endif %}" id="login-pane" role="tabpanel">
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="terminal-card p-4">
+                    <h5 class="text-light fw-bold mb-3">
+                        <i class="fa-solid fa-user-shield text-danger me-2"></i>Form Login Portal Internal
+                    </h5>
+                    
+                    <form method="POST" action="/sqli/login">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Username</label>
+                            <input type="text" name="username" class="form-control bg-dark text-light border-secondary" placeholder="e.g. admin atau ' OR 1=1 --" value="{{ username_val|default('') }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Password</label>
+                            <input type="password" name="password" class="form-control bg-dark text-light border-secondary" placeholder="Password (bisa sembarang saat bypass)" value="{{ password_val|default('') }}">
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" name="waf_enabled" id="sqliWaf" {% if waf_enabled %}checked{% endif %}>
+                            <label class="form-check-label text-muted small" for="sqliWaf">
+                                Aktifkan Filter Naif (Hanya memblokir kata kapital <code>OR</code> dan <code>AND</code>)
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-cyber-primary w-100">
+                            <i class="fa-solid fa-right-to-bracket me-2"></i>Login
+                        </button>
+                    </form>
+
+                    <div class="mt-4 pt-3 border-top border-secondary">
+                        <div class="hint-box">
+                            <h6 class="fw-bold text-info mb-1"><i class="fa-solid fa-lightbulb me-2"></i>Catatan Mentor:</h6>
+                            <p class="small text-muted mb-1">Coba masukkan salah satu payload berikut pada kolom Username:</p>
+                            <ul class="small text-muted mb-0 ps-3">
+                                <li><code>' OR 1=1 --</code> (Bypass user pertama di tabel)</li>
+                                <li><code>admin' --</code> (Login spesifik sebagai akun admin)</li>
+                                <li>Jika WAF aktif: gunakan huruf kecil <code>' or 1=1 --</code> atau <code>admin'/*comment*/--</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <!-- Query Inspection Box -->
+                <div class="terminal-card p-4 mb-4">
+                    <h6 class="text-light fw-bold mb-2">
+                        <i class="fa-solid fa-code text-warning me-2"></i>Inspeksi Query SQL Backend:
+                    </h6>
+                    <div class="terminal-box {% if error_msg %}error{% endif %}">
+{% if executed_query %}
+[SQL EXECUTED]:
+{{ executed_query }}
+{% else %}
+-- Query backend akan tampil di sini saat form disubmit --
+SELECT * FROM users WHERE username = '?' AND password = '?'
+{% endif %}
+                    </div>
+                    {% if error_msg %}
+                    <div class="alert alert-danger mt-2 mb-0 small">
+                        <strong><i class="fa-solid fa-triangle-exclamation me-1"></i> Database Error:</strong> {{ error_msg }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Login Result -->
+                {% if user_data %}
+                <div class="terminal-card p-4 border-success">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fa-solid fa-circle-check text-success fs-3 me-3"></i>
+                        <div>
+                            <h5 class="text-success fw-bold mb-0">Login Berhasil! (Bypass Terverifikasi)</h5>
+                            <span class="text-muted small">Session dibuka sebagai: <strong>{{ user_data.username }}</strong></span>
+                        </div>
+                    </div>
+                    <table class="table table-dark table-sm table-bordered">
+                        <tbody>
+                            <tr><th>User ID</th><td>{{ user_data.id }}</td></tr>
+                            <tr><th>Username</th><td><code>{{ user_data.username }}</code></td></tr>
+                            <tr><th>Role</th><td><span class="badge bg-danger">{{ user_data.role }}</span></td></tr>
+                            <tr><th>Email</th><td>{{ user_data.email }}</td></tr>
+                            <tr><th>API Token</th><td><code>{{ user_data.api_token }}</code></td></tr>
+                        </tbody>
+                    </table>
+                    {% if user_data.role == 'administrator' %}
+                    <div class="alert alert-success mt-2 mb-0">
+                        <i class="fa-solid fa-flag text-danger me-2"></i>
+                        <strong>FLAG TERBUKA:</strong> <code>FLAG{ADMIN_AUTH_BYPASS_SQLI_PWNED}</code>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 2: UNION SELECT Data Extraction -->
+    <div class="tab-pane fade {% if active_tab == 'union' %}show active{% endif %}" id="union-pane" role="tabpanel">
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="terminal-card p-4">
+                    <h5 class="text-light fw-bold mb-2">
+                        <i class="fa-solid fa-magnifying-glass text-danger me-2"></i>Pencarian Katalog &amp; Ekstraksi Data (UNION-Based)
+                    </h5>
+                    <p class="text-muted small mb-3">
+                        Form pencarian ini rentan terhadap injeksi string literal. Peserta dapat menggunakan operator <code>UNION SELECT</code> untuk mengekstrak data dari tabel sensitif <code>customers</code> (kartu kredit) atau <code>secrets</code>.
+                    </p>
+
+                    <form method="GET" action="/sqli/search" class="row g-2 align-items-center mb-3">
+                        <div class="col-md-9">
+                            <input type="text" name="q" class="form-control bg-dark text-light border-secondary" placeholder="Cari produk (misal: Firewall) atau masukkan payload UNION..." value="{{ search_query|default('') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-cyber-primary w-100">
+                                <i class="fa-solid fa-search me-1"></i> Eksekusi Search
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Query Trace -->
+                    {% if search_query is not none %}
+                    <div class="terminal-box mb-3 {% if search_error %}error{% endif %}">
+[SQL SEARCH QUERY]:
+{{ search_sql }}
+                    </div>
+                    {% endif %}
+
+                    {% if search_error %}
+                    <div class="alert alert-danger small">
+                        <strong><i class="fa-solid fa-bug me-1"></i> SQLite Error:</strong> {{ search_error }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Results Table -->
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover table-bordered align-middle">
+                            <thead class="table-secondary text-dark">
+                                <tr>
+                                    <th style="width: 80px;">Col 1 (ID)</th>
+                                    <th>Col 2 (Nama / Data)</th>
+                                    <th>Col 3 (Kategori / Detail)</th>
+                                    <th style="width: 150px;">Col 4 (Harga / CC)</th>
+                                    <th>Col 5 (Deskripsi / Info)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if search_results %}
+                                    {% for row in search_results %}
+                                    <tr>
+                                        <td><code>{{ row[0] }}</code></td>
+                                        <td><strong class="text-light">{{ row[1] }}</strong></td>
+                                        <td><span class="badge bg-secondary">{{ row[2] }}</span></td>
+                                        <td><span class="text-warning fw-bold">{{ row[3] }}</span></td>
+                                        <td class="small text-muted">{{ row[4] }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-3">
+                                            Tidak ada hasil ditemukan atau belum ada query yang dikirimkan.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mentoring Cheat Sheet Box -->
+                    <div class="hint-box mt-3">
+                        <h6 class="fw-bold text-info mb-1"><i class="fa-solid fa-graduation-cap me-2"></i>Instruksi Latihan UNION SQLi untuk Peserta:</h6>
+                        <ol class="small text-muted mb-0 ps-3">
+                            <li><strong>Menentukan jumlah kolom:</strong> Coba <code>' ORDER BY 1 --</code>, <code>' ORDER BY 5 --</code>, hingga error di <code>' ORDER BY 6 --</code> (berarti ada 5 kolom).</li>
+                            <li><strong>Mengetes tipe data kolom:</strong> <code>' UNION SELECT 1, 2, 3, 4, 5 --</code></li>
+                            <li><strong>Ekstraksi Nama Tabel SQLite:</strong> <code>' UNION SELECT 1, tbl_name, 3, 4, sql FROM sqlite_master WHERE type='table' --</code></li>
+                            <li><strong>Ekstraksi Kartu Kredit Nasabah:</strong> <code>' UNION SELECT id, full_name, email, credit_card, cvv FROM customers --</code></li>
+                        </ol>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

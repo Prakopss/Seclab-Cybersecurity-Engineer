@@ -1,0 +1,11 @@
+=== INTERNAL DEV TEAM NOTES (CONFIDENTIAL) ===
+From: Lead Backend Dev
+To: DevOps Team
+
+1. Mohon segera hapus direktori /backup/ ini setelah migrasi server selesai!
+2. Akses staging sementara:
+   - User: dev_testing
+   - Pass: St@gingTestingPass2026!
+3. Flag verifikasi konfigurasi:
+   - FLAG{DEV_NOTES_SENSITIVE_LEAK_4412}
+4. Jangan lupa update certificate SSL sebelum rilis publik.

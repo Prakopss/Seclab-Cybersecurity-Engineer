@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Fast Track Cyber Security{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="p-4 rounded-3 terminal-card border-start border-4 border-success">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h2 class="fw-bold text-light mb-1">
+                        <i class="fa-solid fa-shield-virus text-success me-2"></i>
+                        Vulnerable Web Application Lab
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Platform simulasi eksploitasi web lokal untuk peserta mentoring <strong>Fast Track Cyber Security (4 Minggu)</strong>.
+                    </p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-success-subtle text-success border border-success px-3 py-2">
+                        <i class="fa-solid fa-circle-check me-1"></i> Lab Environment: Active
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modules Grid -->
+<div class="row g-4">
+
+    <!-- Card 1: SQL Injection -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 terminal-card">
+            <div class="card-header card-header-cyber d-flex justify-content-between align-items-center">
+                <span class="fw-bold"><i class="fa-solid fa-database text-danger me-2"></i>Module 1</span>
+                <span class="badge badge-vuln vuln-sqli">SQLi</span>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title text-light fw-bold">SQL Injection</h5>
+                <p class="card-text text-muted small">
+                    Pelajari bagaimana input pengguna yang tidak disanitasi dapat memanipulasi logika query SQL di backend.
+                </p>
+                <ul class="small text-secondary ps-3">
+                    <li>Authentication Bypass (Login admin tanpa password)</li>
+                    <li>UNION-Based SQLi (Mengekstraksi data kartu kredit nasabah)</li>
+                    <li>WAF case-sensitivity bypass</li>
+                </ul>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                <a href="/sqli" class="btn btn-outline-danger w-100 btn-sm">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Masuk Lab SQLi
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: XSS -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 terminal-card">
+            <div class="card-header card-header-cyber d-flex justify-content-between align-items-center">
+                <span class="fw-bold"><i class="fa-solid fa-code text-warning me-2"></i>Module 2</span>
+                <span class="badge badge-vuln vuln-xss">XSS</span>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title text-light fw-bold">Cross-Site Scripting</h5>
+                <p class="card-text text-muted small">
+                    Injeksi payload JavaScript ke dalam browser korban melalui form pencarian dan papan pesan/komentar.
+                </p>
+                <ul class="small text-secondary ps-3">
+                    <li>Reflected XSS (Eksekusi script via parameter URL)</li>
+                    <li>Stored XSS (Penyimpanan script berbahaya di database)</li>
+                    <li>Cookie/Session stealing demonstration</li>
+                </ul>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                <a href="/xss" class="btn btn-outline-warning w-100 btn-sm">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Masuk Lab XSS
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: LFI -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 terminal-card">
+            <div class="card-header card-header-cyber d-flex justify-content-between align-items-center">
+                <span class="fw-bold"><i class="fa-solid fa-folder-open text-info me-2"></i>Module 3</span>
+                <span class="badge badge-vuln vuln-lfi">LFI</span>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title text-light fw-bold">Local File Inclusion</h5>
+                <p class="card-text text-muted small">
+                    Manipulasi parameter file loader untuk membaca file sensitif di sistem operasi server via Path Traversal.
+                </p>
+                <ul class="small text-secondary ps-3">
+                    <li>Directory Traversal (<code class="text-info">../../</code>)</li>
+                    <li>Membaca kode sumber backend (<code class="text-info">app.py</code>)</li>
+                    <li>Mengekstraksi file rahasia server (<code class="text-info">flag.txt</code>)</li>
+                </ul>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                <a href="/lfi" class="btn btn-outline-info w-100 btn-sm">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Masuk Lab LFI
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 4: OS Command Injection -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 terminal-card">
+            <div class="card-header card-header-cyber d-flex justify-content-between align-items-center">
+                <span class="fw-bold"><i class="fa-solid fa-terminal text-danger me-2"></i>Module 4</span>
+                <span class="badge badge-vuln vuln-rce">RCE</span>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title text-light fw-bold">Command Injection</h5>
+                <p class="card-text text-muted small">
+                    Memanfaatkan fungsi diagnostik jaringan server (ping util) untuk mengeksekusi perintah shell sistem (RCE).
+                </p>
+                <ul class="small text-secondary ps-3">
+                    <li>Command chaining (<code class="text-danger">;</code>, <code class="text-danger">&amp;&amp;</code>, <code class="text-danger">|</code>)</li>
+                    <li>Reconnaissance server (<code class="text-danger">whoami</code>, <code class="text-danger">id</code>, <code class="text-danger">dir</code>)</li>
+                    <li>Bypass filter karakter khusus</li>
+                </ul>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                <a href="/rce" class="btn btn-outline-danger w-100 btn-sm">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Masuk Lab RCE
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 5: Filter Bypass -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 terminal-card">
+            <div class="card-header card-header-cyber d-flex justify-content-between align-items-center">
+                <span class="fw-bold"><i class="fa-solid fa-shield-virus text-secondary me-2"></i>Module 5</span>
+                <span class="badge badge-vuln bg-secondary text-light">Filter Evasion</span>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title text-light fw-bold">Filter &amp; WAF Bypass</h5>
+                <p class="card-text text-muted small">
+                    Eksplorasi kelemahan mekanisme sanitasi input dan blacklist regex yang tidak komprehensif.
+                </p>
+                <ul class="small text-secondary ps-3">
+                    <li>Case-sensitivity bypass (<code class="text-warning">&lt;sCrIpt&gt;</code>)</li>
+                    <li>Non-recursive sanitization (<code class="text-warning">&lt;scr&lt;script&gt;ipt&gt;</code>)</li>
+                    <li>Alternative execution vector (<code class="text-warning">&lt;img onerror&gt;</code>)</li>
+                </ul>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                <a href="/waf-bypass" class="btn btn-outline-secondary w-100 btn-sm">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Masuk Lab Filter Bypass
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 6: Network Sniffing & MITM -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 terminal-card">
+            <div class="card-header card-header-cyber d-flex justify-content-between align-items-center">
+                <span class="fw-bold"><i class="fa-solid fa-network-wired text-primary me-2"></i>Module 6</span>
+                <span class="badge badge-vuln vuln-net">Wireshark &amp; Burp</span>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title text-light fw-bold">Network &amp; SSL Lab</h5>
+                <p class="card-text text-muted small">
+                    Praktik analisis paket jaringan pada protokol plaintext (Port 80 HTTP) vs terenkripsi (Port 443 HTTPS).
+                </p>
+                <ul class="small text-secondary ps-3">
+                    <li>Wireshark sniffing: Tangkap password plaintext di HTTP</li>
+                    <li>Burp Suite Interception pada port 443 HTTPS</li>
+                    <li>Instalasi CA Certificate (cacert.der) untuk MITM</li>
+                </ul>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                <a href="/network-lab" class="btn btn-outline-primary w-100 btn-sm">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Masuk Lab Network
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 7: File Upload -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 terminal-card">
+            <div class="card-header card-header-cyber d-flex justify-content-between align-items-center">
+                <span class="fw-bold"><i class="fa-solid fa-cloud-arrow-up text-success me-2"></i>Module 7</span>
+                <span class="badge bg-success text-dark fw-bold">Upload</span>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title text-light fw-bold">Unrestricted File Upload</h5>
+                <p class="card-text text-muted small">
+                    Eksploitasi fitur upload tanpa validasi ekstensi dan tipe file untuk mengunggah script HTML/SVG/Web Shell.
+                </p>
+                <ul class="small text-secondary ps-3">
+                    <li>Stored XSS via file SVG / HTML upload</li>
+                    <li>Eksekusi script / file attachment langsung</li>
+                    <li>Bypass blacklist ekstensi sederhana (.php)</li>
+                </ul>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                <a href="/upload" class="btn btn-outline-success w-100 btn-sm">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Masuk Lab File Upload
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 8: Reconnaissance & Open Directory -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 terminal-card">
+            <div class="card-header card-header-cyber d-flex justify-content-between align-items-center">
+                <span class="fw-bold"><i class="fa-solid fa-folder-tree text-warning me-2"></i>Module 8</span>
+                <span class="badge bg-warning text-dark fw-bold">Recon &amp; Open Dir</span>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title text-light fw-bold">Recon &amp; Directory Listing</h5>
+                <p class="card-text text-muted small">
+                    Teknik reconnaissance web untuk menemukan direktori tersembunyi via robots.txt dan kebocoran backup database.
+                </p>
+                <ul class="small text-secondary ps-3">
+                    <li>Inspeksi <code class="text-warning">/robots.txt</code> menemukan endpoint rahasia</li>
+                    <li>Open Directory <code class="text-warning">/backup/</code> membocorkan database SQL</li>
+                    <li>Ekstraksi kredensial developer &amp; config backup</li>
+                </ul>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                <div class="d-flex gap-2">
+                    <a href="/backup/" class="btn btn-outline-warning w-50 btn-sm">
+                        <i class="fa-solid fa-folder-open me-1"></i> Open Dir
+                    </a>
+                    <a href="/robots.txt" target="_blank" class="btn btn-outline-info w-50 btn-sm">
+                        <i class="fa-solid fa-robot me-1"></i> robots.txt
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Architecture & Quick Start Info -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="terminal-card p-4">
+            <h5 class="text-light fw-bold mb-3">
+                <i class="fa-solid fa-circle-info text-info me-2"></i>Petunjuk Cepat Mentor &amp; Peserta
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="p-3 border border-secondary rounded bg-dark">
+                        <h6 class="text-success fw-bold"><i class="fa-brands fa-docker me-2"></i>Mode Docker</h6>
+                        <p class="text-muted small mb-0">
+                            Jalankan perintah <code class="code-snippet">docker-compose up -d --build</code> untuk mengaktifkan port 80 (HTTP) dan port 443 (HTTPS) secara bersamaan.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 border border-secondary rounded bg-dark">
+                        <h6 class="text-warning fw-bold"><i class="fa-brands fa-python me-2"></i>Mode Standalone Python</h6>
+                        <p class="text-muted small mb-0">
+                            Jalankan <code class="code-snippet">python init_db.py</code> lalu <code class="code-snippet">python app.py</code> untuk menjalankan lab langsung di <code class="code-snippet">http://localhost:5000</code>.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 border border-secondary rounded bg-dark">
+                        <h6 class="text-info fw-bold"><i class="fa-solid fa-rotate-left me-2"></i>Reset Status Lab</h6>
+                        <p class="text-muted small mb-0">
+                            Jika database terhapus atau tercemar payload XSS berlebih, klik tombol <strong>Reset DB</strong> di pojok kanan atas untuk memulihkan state awal.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

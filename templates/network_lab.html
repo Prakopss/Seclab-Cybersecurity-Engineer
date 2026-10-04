@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Module 6: Network Sniffing & SSL Lab{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="fw-bold text-light mb-1">
+            <i class="fa-solid fa-network-wired text-primary me-2"></i>Module 6: Network Sniffing (Wireshark) &amp; MITM (Burp Suite)
+        </h3>
+        <p class="text-muted mb-0">Praktik perbandingan keamanan lalu lintas jaringan pada protokol HTTP Plaintext (Port 80) vs HTTPS Enkripsi (Port 443).</p>
+    </div>
+    <span class="badge badge-vuln vuln-net fs-6 px-3 py-2">Network Security</span>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Port 80 Card -->
+    <div class="col-md-6">
+        <div class="terminal-card p-4 h-100 border-start border-4 border-danger">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="text-light fw-bold mb-0">
+                    <i class="fa-solid fa-unlock text-danger me-2"></i>Port 80: HTTP Plaintext
+                </h5>
+                <span class="badge bg-danger">Insecure</span>
+            </div>
+            <p class="text-muted small">
+                Pada port 80, semua paket data (termasuk password dan token otentikasi) dikirim dalam bentuk teks mentah tanpa enkripsi.
+            </p>
+            <div class="alert alert-dark border-secondary small">
+                <strong>Tujuan Praktik Wireshark:</strong><br>
+                Peserta mengamati adapter loopback/ethernet menggunakan Wireshark, lalu melakukan filter <code>http.request.method == "POST"</code> untuk membaca kredensial pengguna yang disubmit pada form di bawah.
+            </div>
+            <div class="p-3 bg-dark rounded border border-secondary">
+                <h6 class="text-warning small fw-bold mb-2">Form Percobaan Pengiriman Plaintext:</h6>
+                <form method="POST" action="/network-lab/login-test">
+                    <div class="mb-2">
+                        <input type="text" name="sniff_user" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Username (misal: auditor_soc)" required>
+                    </div>
+                    <div class="mb-2">
+                        <input type="password" name="sniff_pass" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Password Rahasia" required>
+                    </div>
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100 fw-bold">
+                        <i class="fa-solid fa-satellite-dish me-1"></i> Kirim Paket Kredensial via HTTP
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Port 443 Card -->
+    <div class="col-md-6">
+        <div class="terminal-card p-4 h-100 border-start border-4 border-success">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="text-light fw-bold mb-0">
+                    <i class="fa-solid fa-lock text-success me-2"></i>Port 443: HTTPS (Self-Signed SSL)
+                </h5>
+                <span class="badge bg-success">Encrypted</span>
+            </div>
+            <p class="text-muted small">
+                Pada port 443, seluruh lalu lintas dienkripsi menggunakan TLS. Lab ini menggunakan sertifikat mandiri (self-signed) yang dibuat otomatis oleh Docker.
+            </p>
+            <div class="alert alert-dark border-secondary small">
+                <strong>Tujuan Praktik Burp Suite:</strong><br>
+                Peserta mengonfigurasi proxy browser ke Burp Suite (<code class="text-info">127.0.0.1:8080</code>) dan mengimpor <strong>Burp CA Certificate (PortSwigger CA)</strong> agar browser dapat melakukan inspeksi Man-in-the-Middle (MITM) tanpa TLS warning.
+            </div>
+            <div class="p-3 bg-dark rounded border border-secondary text-center">
+                <p class="small text-muted mb-2">Akses server via protokol aman:</p>
+                <a href="https://localhost:443" target="_blank" class="btn btn-outline-success btn-sm w-100 fw-bold">
+                    <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Buka https://localhost:443 di Tab Baru
+                </a>
+                <span class="text-secondary small d-block mt-2">
+                    * Catatan: Browser akan menampilkan peringatan keamanan (Self-Signed). Ini normal dan merupakan bagian dari latihan!
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Step-by-Step Lab Instructions -->
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="terminal-card p-4">
+            <h5 class="text-light fw-bold mb-3">
+                <i class="fa-solid fa-fish text-primary me-2"></i>SOP Praktik 1: Wireshark Sniffing (Port 80)
+            </h5>
+            <ol class="small text-muted ps-3 mb-0">
+                <li class="mb-2">Buka aplikasi <strong>Wireshark</strong> di komputer Anda.</li>
+                <li class="mb-2">
+                    Pilih interface penangkapan:
+                    <ul>
+                        <li>Jika menggunakan Docker / Host lokal: pilih <code>Adapter for loopback traffic capture</code> atau <code>vEthernet (DockerNAT/WSL)</code>.</li>
+                        <li>Jika diakses melalui LAN mentoring: pilih interface <code>Ethernet</code> atau <code>Wi-Fi</code>.</li>
+                    </ul>
+                </li>
+                <li class="mb-2">Ketik display filter di bagian atas: <code class="code-snippet">http.request.method == "POST"</code></li>
+                <li class="mb-2">Submit form kredensial pada kolom Port 80 di sebelah atas halaman ini.</li>
+                <li class="mb-2">Perhatikan paket HTTP POST yang muncul di Wireshark. Klik kanan paket &gt; <strong>Follow &gt; TCP Stream</strong>.</li>
+                <li class="mb-0">
+                    <span class="text-success fw-bold">Hasil:</span> Peserta akan melihat kredensial username dan password secara telanjang tanpa enkripsi!
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="terminal-card p-4">
+            <h5 class="text-light fw-bold mb-3">
+                <i class="fa-solid fa-shield text-warning me-2"></i>SOP Praktik 2: Burp Suite MITM &amp; CA Setup (Port 443)
+            </h5>
+            <ol class="small text-muted ps-3 mb-0">
+                <li class="mb-2">Jalankan <strong>Burp Suite Community Edition</strong>. Buka tab <strong>Proxy &gt; Intercept</strong> dan pastikan status <code>Intercept is on</code>.</li>
+                <li class="mb-2">Buka browser bawaan Burp (klik <strong>Open Browser</strong> di tab Proxy) ATAU konfigurasikan ekstensi <em>FoxyProxy</em> ke <code>127.0.0.1:8080</code>.</li>
+                <li class="mb-2">
+                    Jika menggunakan browser eksternal: Buka <code>http://burp</code>, klik <strong>CA Certificate</strong> di pojok kanan atas untuk mengunduh <code>cacert.der</code>, lalu impor ke sertifikat browser (Trust as Root Authority).
+                </li>
+                <li class="mb-2">Akses URL <code class="code-snippet">https://localhost:443/sqli</code> melalui browser yang telah ber-proxy.</li>
+                <li class="mb-2">Burp Suite akan menangkap request HTTPS secara realtime sebelum dikirim ke server.</li>
+                <li class="mb-0">
+                    <span class="text-success fw-bold">Hasil:</span> Peserta memahami cara kerja dekripsi SSL/TLS inspeksi proksi pada audit penetrasi aplikasi web.
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %}

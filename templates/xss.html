@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Module 2: Cross-Site Scripting (XSS){% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="fw-bold text-light mb-1">
+            <i class="fa-solid fa-code text-warning me-2"></i>Module 2: Cross-Site Scripting (XSS)
+        </h3>
+        <p class="text-muted mb-0">Eksplorasi eksekusi JavaScript berbahaya di sisi client browser korban.</p>
+    </div>
+    <span class="badge badge-vuln vuln-xss fs-6 px-3 py-2">OWASP Top 10: A03:2021-Injection</span>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-4" id="xssTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link {% if active_tab == 'reflected' or not active_tab %}active{% endif %}" id="reflected-tab" data-bs-toggle="tab" data-bs-target="#reflected-pane" type="button" role="tab">
+            <i class="fa-solid fa-arrow-trend-up me-2"></i>2.1 Reflected XSS
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link {% if active_tab == 'stored' %}active{% endif %}" id="stored-tab" data-bs-toggle="tab" data-bs-target="#stored-pane" type="button" role="tab">
+            <i class="fa-solid fa-floppy-disk me-2"></i>2.2 Stored XSS (Papan Pesan)
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="xssTabsContent">
+
+    <!-- Tab 1: Reflected XSS -->
+    <div class="tab-pane fade {% if active_tab == 'reflected' or not active_tab %}show active{% endif %}" id="reflected-pane" role="tabpanel">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="terminal-card p-4">
+                    <h5 class="text-light fw-bold mb-3">
+                        <i class="fa-solid fa-magnifying-glass text-warning me-2"></i>Pencarian Log SOC (Reflected)
+                    </h5>
+                    
+                    <form method="GET" action="/xss/reflected">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Kata Kunci Pencarian / Query</label>
+                            <input type="text" name="q" class="form-control bg-dark text-light border-secondary" placeholder="e.g. Audit atau &lt;script&gt;alert('XSS')&lt;/script&gt;" value="{{ query|default('') }}" required>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" name="filter_enabled" id="xssFilter" {% if filter_enabled %}checked{% endif %}>
+                            <label class="form-check-label text-muted small" for="xssFilter">
+                                Aktifkan Filter Lemah (Memblokir kata <code>script</code> huruf kecil saja)
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-warning fw-bold text-dark w-100">
+                            <i class="fa-solid fa-search me-1"></i> Cari Log &amp; Render Output
+                        </button>
+                    </form>
+
+                    <div class="hint-box mt-4">
+                        <h6 class="fw-bold text-info mb-1"><i class="fa-solid fa-lightbulb me-2"></i>Ide Payload untuk Siswa:</h6>
+                        <ul class="small text-muted mb-0 ps-3">
+                            <li><strong>Payload Dasar:</strong> <code>&lt;script&gt;alert('XSS Reflected')&lt;/script&gt;</code></li>
+                            <li><strong>Filter Case Bypass:</strong> <code>&lt;sCrIpt&gt;alert(document.domain)&lt;/sCrIpt&gt;</code></li>
+                            <li><strong>Vector Tanpa Script:</strong> <code>&lt;img src=x onerror=alert('Pwned')&gt;</code></li>
+                            <li><strong>Vector SVG:</strong> <code>&lt;svg onload=alert(document.cookie)&gt;</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="terminal-card p-4 h-100">
+                    <h5 class="text-light fw-bold mb-3">
+                        <i class="fa-solid fa-desktop text-success me-2"></i>Live Render Area
+                    </h5>
+
+                    {% if blocked_by_filter %}
+                    <div class="alert alert-danger">
+                        <strong><i class="fa-solid fa-shield-halved me-1"></i> Filter Triggered:</strong> Input Anda diblokir oleh WAF karena mengandung kata <code>script</code> huruf kecil!
+                        <div class="small text-muted mt-1">Petunjuk: Coba gunakan variasi huruf besar-kecil atau tag HTML alternatif seperti <code>&lt;img&gt;</code> atau <code>&lt;svg&gt;</code>.</div>
+                    </div>
+                    {% elif query is not none %}
+                    <div class="alert alert-secondary border border-secondary mb-3">
+                        Hasil pencarian untuk:
+                        <span class="fw-bold text-info">
+                            <!-- Vulnerable: rendered with safe filter -->
+                            {{ query | safe }}
+                        </span>
+                    </div>
+
+                    <h6 class="text-muted small fw-bold">Inspeksi Source Code HTML yang Dihasilkan:</h6>
+                    <div class="terminal-box">
+&lt;div class="search-result"&gt;
+  Hasil pencarian untuk: {{ query }}
+&lt;/div&gt;
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="fa-solid fa-terminal fs-1 mb-3 opacity-25"></i>
+                        <p>Ketik query pencarian di sebelah kiri untuk melihat hasil render di browser.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 2: Stored XSS -->
+    <div class="tab-pane fade {% if active_tab == 'stored' %}show active{% endif %}" id="stored-pane" role="tabpanel">
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="terminal-card p-4">
+                    <h5 class="text-light fw-bold mb-3">
+                        <i class="fa-solid fa-message text-warning me-2"></i>Papan Komentar / Catatan Insiden SOC
+                    </h5>
+                    <form method="POST" action="/xss/stored">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Nama / Alias Analis</label>
+                            <input type="text" name="author" class="form-control bg-dark text-light border-secondary" placeholder="e.g. SecAnalyst" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Catatan / Komentar</label>
+                            <textarea name="comment" rows="4" class="form-control bg-dark text-light border-secondary" placeholder="e.g. &lt;img src=x onerror=alert('Stored XSS - Executed on Every Refresh!')&gt;" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-warning fw-bold text-dark w-100 mb-2">
+                            <i class="fa-solid fa-paper-plane me-1"></i> Simpan Catatan (Simpan ke DB)
+                        </button>
+                    </form>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-secondary">
+                        <span class="text-muted small">Ingin membersihkan payload?</span>
+                        <a href="/xss/clear" class="btn btn-outline-danger btn-sm" onclick="return confirm('Hapus semua komentar yang tersimpan di DB?');">
+                            <i class="fa-solid fa-trash me-1"></i> Reset Komentar
+                        </a>
+                    </div>
+
+                    <div class="hint-box mt-3">
+                        <h6 class="fw-bold text-info mb-1"><i class="fa-solid fa-circle-exclamation me-2"></i>Dampak Stored XSS:</h6>
+                        <p class="small text-muted mb-0">
+                            Setiap pengguna lain yang membuka halaman ini akan mengeksekusi payload JavaScript yang tersimpan di database tanpa perlu mengklik link khusus.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="terminal-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="text-light fw-bold mb-0">
+                            <i class="fa-solid fa-comments text-light me-2"></i>Daftar Catatan Tersimpan
+                        </h5>
+                        <span class="badge bg-secondary">{{ comments|length }} pesan</span>
+                    </div>
+
+                    <div class="vstack gap-3">
+                        {% for c in comments %}
+                        <div class="p-3 rounded bg-dark border border-secondary">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold text-info"><i class="fa-solid fa-user-circle me-1"></i>{{ c[1] }}</span>
+                                <span class="small text-muted">{{ c[3] }}</span>
+                            </div>
+                            <div class="text-light">
+                                <!-- VULNERABLE: Rendered with safe filter (Stored XSS) -->
+                                {{ c[2] | safe }}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center text-muted py-4">Belum ada catatan yang tersimpan.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

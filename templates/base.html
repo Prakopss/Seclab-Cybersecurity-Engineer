@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CyberLab FastTrack{% endblock %} - Junior Cybersecurity Lab</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Custom CyberLab CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-cyber sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+                <i class="fa-solid fa-shield-halved text-success me-2 fs-4"></i>
+                <span>CyberLab</span>
+                <span class="brand-badge">FastTrack 4W</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_page == 'home' %}active fw-semibold{% endif %}" href="/">
+                            <i class="fa-solid fa-house me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_page == 'sqli' %}active fw-semibold{% endif %}" href="/sqli">
+                            <i class="fa-solid fa-database me-1 text-danger"></i> SQL Injection
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_page == 'xss' %}active fw-semibold{% endif %}" href="/xss">
+                            <i class="fa-solid fa-code me-1 text-warning"></i> XSS
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_page == 'lfi' %}active fw-semibold{% endif %}" href="/lfi">
+                            <i class="fa-solid fa-folder-open me-1 text-info"></i> LFI
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_page == 'rce' %}active fw-semibold{% endif %}" href="/rce">
+                            <i class="fa-solid fa-terminal me-1 text-danger"></i> Command Injection
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_page == 'waf' %}active fw-semibold{% endif %}" href="/waf-bypass">
+                            <i class="fa-solid fa-shield-virus me-1 text-secondary"></i> Filter Bypass
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_page == 'upload' %}active fw-semibold{% endif %}" href="/upload">
+                            <i class="fa-solid fa-cloud-arrow-up me-1 text-success"></i> File Upload
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_page == 'open_dir' %}active fw-semibold{% endif %}" href="/backup/">
+                            <i class="fa-solid fa-folder-tree me-1 text-warning"></i> Open Dir
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_page == 'network' %}active fw-semibold{% endif %}" href="/network-lab">
+                            <i class="fa-solid fa-network-wired me-1 text-primary"></i> HTTP / HTTPS
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="/robots.txt" target="_blank" class="btn btn-outline-info btn-sm">
+                        <i class="fa-solid fa-robot me-1"></i> robots.txt
+                    </a>
+                    <a href="/reset-db" class="btn btn-outline-warning btn-sm" onclick="return confirm('Reset database ke kondisi awal dummy data?');">
+                        <i class="fa-solid fa-rotate-left me-1"></i> Reset DB
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="container my-4 flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-3 bg-dark border-top border-secondary text-center text-muted small">
+        <div class="container">
+            <p class="mb-1">
+                <i class="fa-solid fa-graduation-cap text-success me-1"></i>
+                <strong>CyberLab Mentoring Portal</strong> &bull; Fast Track Cyber Security 4 Minggu
+            </p>
+            <p class="mb-0 text-secondary">
+                Didesain khusus untuk tujuan edukasi & praktik lab tertutup. Dilarang menggunakan teknik ini pada target tanpa izin resmi.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

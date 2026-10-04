@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Module 3: Local File Inclusion (LFI){% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="fw-bold text-light mb-1">
+            <i class="fa-solid fa-folder-open text-info me-2"></i>Module 3: Local File Inclusion (LFI)
+        </h3>
+        <p class="text-muted mb-0">Celah pembacaan file lokal server melalui eksploitasi Path Traversal pada parameter URL.</p>
+    </div>
+    <span class="badge badge-vuln vuln-lfi fs-6 px-3 py-2">OWASP Top 10: A01:2021-Broken Access Control</span>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="terminal-card p-4">
+            <h5 class="text-light fw-bold mb-3">
+                <i class="fa-solid fa-file-lines text-info me-2"></i>Dokumentasi &amp; Policy Viewer
+            </h5>
+            <p class="text-muted small">
+                Aplikasi menggunakan parameter <code class="code-snippet">?file=</code> untuk memuat file teks dokumentasi dari disk server.
+            </p>
+
+            <form method="GET" action="/lfi" class="mb-3">
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Pilih Dokumen Resmi:</label>
+                    <select class="form-select bg-dark text-light border-secondary" onchange="document.getElementById('fileInput').value = this.value;">
+                        <option value="">-- Pilih Preset File --</option>
+                        <option value="about_portal.txt">about_portal.txt (Tentang Portal)</option>
+                        <option value="company_policy.txt">company_policy.txt (Kebijakan Keamanan)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Parameter File Path (Celah Traversal):</label>
+                    <input type="text" id="fileInput" name="file" class="form-control bg-dark text-light border-secondary font-monospace" placeholder="e.g. ../sensitive_files/flag.txt" value="{{ filename|default('about_portal.txt') }}" required>
+                </div>
+
+                <button type="submit" class="btn btn-outline-info w-100 fw-bold">
+                    <i class="fa-solid fa-file-import me-1"></i> Muat &amp; Tampilkan File
+                </button>
+            </form>
+
+            <div class="hint-box mt-4">
+                <h6 class="fw-bold text-info mb-1"><i class="fa-solid fa-bullseye me-2"></i>Target Lab untuk Peserta:</h6>
+                <ol class="small text-muted mb-0 ps-3">
+                    <li><strong>Membaca Flag Rahasia:</strong> Coba parameter <code>file=flag.txt</code> atau <code>file=../sensitive_files/flag.txt</code></li>
+                    <li><strong>Membaca Backup Config:</strong> Coba <code>file=server_config.bak</code></li>
+                    <li><strong>Membaca Source Code:</strong> Coba <code>file=../app.py</code> atau <code>file=../init_db.py</code></li>
+                    <li><strong>Membaca File Sistem OS (Docker/Linux):</strong> Coba <code>file=/etc/passwd</code> atau <code>file=../../../../../../etc/passwd</code></li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="terminal-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="text-light fw-bold mb-0">
+                    <i class="fa-solid fa-terminal text-success me-2"></i>Isi File Disk Server
+                </h5>
+                <span class="badge bg-secondary font-monospace">{{ filename }}</span>
+            </div>
+
+            <div class="small text-muted mb-2 font-monospace">
+                Server Base Dir: <span class="text-info">{{ base_dir }}</span><br>
+                Target File Resolved: <span class="text-warning">{{ resolved_path }}</span>
+            </div>
+
+            {% if error_msg %}
+            <div class="alert alert-danger font-monospace small">
+                <i class="fa-solid fa-triangle-exclamation me-1"></i> <strong>Error:</strong> {{ error_msg }}
+            </div>
+            {% else %}
+            <div class="terminal-box" style="min-height: 280px; max-height: 500px;">
+{{ file_content }}
+            </div>
+            {% endif %}
+
+            {% if "FLAG{" in file_content %}
+            <div class="alert alert-success mt-3 mb-0">
+                <i class="fa-solid fa-award text-success me-2"></i>
+                <strong>FLAG DITEMUKAN!</strong> Anda berhasil mengekstraksi file rahasia melalui eksploitasi Local File Inclusion.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

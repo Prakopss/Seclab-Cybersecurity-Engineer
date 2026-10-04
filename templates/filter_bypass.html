@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Module 5: Filter & WAF Bypass{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h3 class="fw-bold text-light mb-1">
+            <i class="fa-solid fa-shield-virus text-secondary me-2"></i>Module 5: Filter &amp; WAF Bypass Playground
+        </h3>
+        <p class="text-muted mb-0">Laboratorium interaktif untuk menguji celah logika sanitasi input dan blacklist regex yang tidak sempurna.</p>
+    </div>
+    <span class="badge badge-vuln bg-secondary text-light fs-6 px-3 py-2">Defense Evasion Lab</span>
+</div>
+
+<div class="row g-4">
+
+    <!-- Challenge 1: Case-Sensitivity Flaw -->
+    <div class="col-lg-6">
+        <div class="terminal-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="text-light fw-bold mb-0">1. Case-Sensitivity Flaw</h5>
+                <span class="badge bg-warning text-dark">Tingkat: Basic</span>
+            </div>
+            <p class="text-muted small">
+                Filter ini hanya memeriksa string kata <code>script</code> dalam huruf kecil tanpa normalisasi lowercase.
+            </p>
+            
+            <div class="terminal-box mb-3 small" style="padding: 8px;">
+# Kode Backend Rentan:
+if "script" in user_input:
+    return "BLOCKED by Naive Blacklist!"
+            </div>
+
+            <form method="POST" action="/waf-bypass/case">
+                <div class="mb-3">
+                    <input type="text" name="input_payload" class="form-control bg-dark text-light border-secondary font-monospace" placeholder="e.g. <sCrIpt>alert(1)</sCrIpt>" value="{{ case_input|default('') }}" required>
+                </div>
+                <button type="submit" class="btn btn-outline-warning w-100 btn-sm fw-bold">
+                    <i class="fa-solid fa-play me-1"></i> Uji Filter Huruf Besar/Kecil
+                </button>
+            </form>
+
+            {% if case_result is not none %}
+            <div class="mt-3">
+                {% if case_blocked %}
+                <div class="alert alert-danger small py-2">
+                    <i class="fa-solid fa-ban me-1"></i> <strong>HASIL: DIBLOKIR!</strong> String <code>script</code> huruf kecil terdeteksi.
+                </div>
+                {% else %}
+                <div class="alert alert-success small py-2">
+                    <i class="fa-solid fa-check-circle me-1"></i> <strong>HASIL: LOLOS (BYPASS BERHASIL)!</strong>
+                    <div class="mt-1">Browser mengeksekusi: <code>{{ case_input | safe }}</code></div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Challenge 2: Non-Recursive Stripping Flaw -->
+    <div class="col-lg-6">
+        <div class="terminal-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="text-light fw-bold mb-0">2. Non-Recursive Stripping Flaw</h5>
+                <span class="badge bg-info text-dark">Tingkat: Intermediate</span>
+            </div>
+            <p class="text-muted small">
+                Filter mencoba menghapus tag dengan <code class="code-snippet">replace('&lt;script&gt;', '')</code> hanya sekali tanpa perulangan rekursif.
+            </p>
+
+            <div class="terminal-box mb-3 small" style="padding: 8px;">
+# Kode Backend Rentan:
+sanitized = user_input.replace("&lt;script&gt;", "").replace("&lt;/script&gt;", "")
+            </div>
+
+            <form method="POST" action="/waf-bypass/recursive">
+                <div class="mb-3">
+                    <input type="text" name="input_payload" class="form-control bg-dark text-light border-secondary font-monospace" placeholder="e.g. <scr<script>ipt>alert(1)</scr</script>ipt>" value="{{ rec_input|default('') }}" required>
+                </div>
+                <button type="submit" class="btn btn-outline-info w-100 btn-sm fw-bold">
+                    <i class="fa-solid fa-play me-1"></i> Uji Non-Recursive Stripping
+                </button>
+            </form>
+
+            {% if rec_result is not none %}
+            <div class="mt-3">
+                <div class="terminal-box small mb-2">
+Hasil setelah replace():
+{{ rec_result }}
+                </div>
+                {% if "<script>" in rec_result %}
+                <div class="alert alert-success small py-2">
+                    <i class="fa-solid fa-award me-1"></i> <strong>BYPASS BERHASIL!</strong> Potongan tag luar menyatu kembali menjadi <code>&lt;script&gt;</code> aktif!
+                </div>
+                {% else %}
+                <div class="alert alert-secondary small py-2">
+                    Tag berhasil disterilkan atau belum lolos. Coba sematkan tag bersarang!
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Challenge 3: Incomplete Tag Blacklist -->
+    <div class="col-lg-6">
+        <div class="terminal-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="text-light fw-bold mb-0">3. Incomplete Blacklist (Alternative Vectors)</h5>
+                <span class="badge bg-danger text-light">Tingkat: Advanced</span>
+            </div>
+            <p class="text-muted small">
+                Filter memblokir tag <code>&lt;script&gt;</code> dengan case-insensitive regex, namun lupa memblokir event handler HTML seperti <code>onload</code> atau <code>onerror</code>.
+            </p>
+
+            <div class="terminal-box mb-3 small" style="padding: 8px;">
+# Kode Backend:
+if re.search(r'&lt;script&gt;', user_input, re.IGNORECASE):
+    return "BLOCKED: No &lt;script&gt; allowed!"
+            </div>
+
+            <form method="POST" action="/waf-bypass/tag">
+                <div class="mb-3">
+                    <input type="text" name="input_payload" class="form-control bg-dark text-light border-secondary font-monospace" placeholder="e.g. <img src=x onerror=alert('Bypassed')>" value="{{ tag_input|default('') }}" required>
+                </div>
+                <button type="submit" class="btn btn-outline-danger w-100 btn-sm fw-bold">
+                    <i class="fa-solid fa-play me-1"></i> Uji Alternative Tag Vector
+                </button>
+            </form>
+
+            {% if tag_result is not none %}
+            <div class="mt-3">
+                {% if tag_blocked %}
+                <div class="alert alert-danger small py-2">
+                    <i class="fa-solid fa-ban me-1"></i> <strong>DIBLOKIR:</strong> Tag <code>&lt;script&gt;</code> terdeteksi oleh regex.
+                </div>
+                {% else %}
+                <div class="alert alert-success small py-2">
+                    <i class="fa-solid fa-fire me-1"></i> <strong>BYPASS BERHASIL!</strong> Payload lolos tanpa menggunakan tag <code>&lt;script&gt;</code>:
+                    <div class="mt-1">{{ tag_input | safe }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Challenge 4: Command Separation Bypass -->
+    <div class="col-lg-6">
+        <div class="terminal-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="text-light fw-bold mb-0">4. Command Chaining Blacklist</h5>
+                <span class="badge bg-secondary text-light">OS Shell</span>
+            </div>
+            <p class="text-muted small">
+                Filter memblokir tanda titik koma <code>;</code> dan <code>&amp;&amp;</code>, namun mengabaikan operator piping pipa tunggal <code>|</code> atau operator OR <code>||</code>.
+            </p>
+
+            <div class="terminal-box mb-3 small" style="padding: 8px;">
+# Kode Backend:
+if ";" in cmd or "&amp;&amp;" in cmd:
+    return "BLOCKED: Dangerous shell character detected!"
+            </div>
+
+            <form method="POST" action="/waf-bypass/cmd">
+                <div class="mb-3">
+                    <input type="text" name="input_payload" class="form-control bg-dark text-light border-secondary font-monospace" placeholder="e.g. 127.0.0.1 | whoami" value="{{ cmd_input|default('') }}" required>
+                </div>
+                <button type="submit" class="btn btn-outline-secondary w-100 btn-sm fw-bold">
+                    <i class="fa-solid fa-play me-1"></i> Uji Command Separator
+                </button>
+            </form>
+
+            {% if cmd_result is not none %}
+            <div class="mt-3">
+                {% if cmd_blocked %}
+                <div class="alert alert-danger small py-2">
+                    <i class="fa-solid fa-ban me-1"></i> <strong>DIBLOKIR:</strong> Karakter <code>;</code> atau <code>&amp;&amp;</code> terdeteksi.
+                </div>
+                {% else %}
+                <div class="alert alert-success small py-2">
+                    <i class="fa-solid fa-check-double me-1"></i> <strong>BYPASS BERHASIL!</strong> Perintah dieksekusi dengan separator pipa <code>|</code>:
+                    <div class="terminal-box mt-2 small">{{ cmd_result }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

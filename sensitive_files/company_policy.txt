@@ -1,0 +1,12 @@
+=== KEBIJAKAN KEAMANAN INFORMASI PERUSAHAAN (SOP-SEC-001) ===
+
+1. Kredensial dan Password:
+   - Password wajib diganti setiap 90 hari.
+   - Dilarang menyimpan password dalam plaintext di desktop atau repositori publik.
+
+2. Akses Jaringan:
+   - Akses administratif ke server produksi hanya diizinkan melalui VPN Internal.
+   - Port 80 (HTTP) dilarang digunakan di lingkungan produksi; wajib menggunakan TLS 1.3 pada port 443.
+
+3. Penanganan Insiden:
+   - Setiap indikasi SQL Injection, XSS, atau Remote Code Execution wajib dilaporkan ke tim SOC dalam waktu 1x24 jam.

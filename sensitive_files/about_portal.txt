@@ -1,0 +1,3 @@
+Selamat datang di CyberLab Enterprise Gateway.
+Sistem ini merupakan portal internal terpadu untuk monitoring SOC, inventaris keamanan, dan layanan audit teknis.
+Harap gunakan kredensial yang sah untuk mengakses sistem administrasi.

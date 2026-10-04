@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: cyberlab_flask_app
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    expose:
+      - "5000"
+    networks:
+      - cyberlab_net
+
+  reverse-proxy:
+    build: ./nginx
+    container_name: cyberlab_reverse_proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"    # HTTP Plaintext (Sniffing with Wireshark)
+      - "443:443"  # HTTPS SSL (Burp Suite MITM & CA Import Practice)
+    depends_on:
+      - web
+    networks:
+      - cyberlab_net
+
+networks:
+  cyberlab_net:
+    driver: bridge
